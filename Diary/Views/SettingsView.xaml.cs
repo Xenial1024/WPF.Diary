@@ -15,12 +15,10 @@ using System.Windows.Shapes;
 
 namespace Diary.Views
 {
-    /// <summary>
-    /// Interaction logic for Settings.xaml
-    /// </summary>
-    public partial class Settings : MetroWindow
+
+    public partial class SettingsView : MetroWindow
     {
-        public Settings()
+        public SettingsView()
         {
             InitializeComponent();
         }

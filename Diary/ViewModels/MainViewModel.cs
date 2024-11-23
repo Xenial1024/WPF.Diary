@@ -13,41 +13,57 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace Diary.ViewModels
 {
     public class MainViewModel : ViewModelBase
     {
-        MetroWindow metroWindow = Application.Current.MainWindow as MetroWindow; 
-        private Repository _repository = new Repository(); 
+        MetroWindow metroWindow = Application.Current.MainWindow as MetroWindow;
+        private Repository _repository = new Repository();
         public MainViewModel()
         {
-            OpenDialogIfConnectionToDatabaseFailed();
-            
             AddStudentCommand = new RelayCommand(AddEditStudent);
-            EditStudentCommand = new RelayCommand(AddEditStudent, 
+            EditStudentCommand = new RelayCommand(AddEditStudent,
                 CanEditDeleteStudent);
-            DeleteStudentCommand = new AsyncRelayCommand(DeleteStudent, 
+            DeleteStudentCommand = new AsyncRelayCommand(DeleteStudent,
                 CanEditDeleteStudent);
             RefreshStudentsCommand = new RelayCommand(RefreshStudents);
 
-            
             RefreshDiary();
             InitGroups();
-
-        }        
-
-        void OpenSettingsWindow()
-        {
-            Settings settings = new Settings();
-            settings.Show();
+            //metroWindow.Loaded += MetroWindow_Loaded;
+            //for (; ; )
+            //{
+            //    if (metroWindow != null && metroWindow.IsLoaded)
+            //    {
+            //        OpenDialogIfConnectionToDatabaseFailed();
+            //        break;
+            //    }
+            //}
+            OpenDialogIfConnectionToDatabaseFailed();
         }
+
+        //private void MetroWindow_Loaded(object sender, RoutedEventArgs e)
+        //{
+        //    OpenDialogIfConnectionToDatabaseFailed();
+        //}
 
         private async void OpenDialogIfConnectionToDatabaseFailed()
         {
             if (!IsConnectionToDatabaseValid())
             {
+                //if (metroWindow != null)
+                //{
+                //if (!metroWindow.IsActive)
+                //{
+                //    metroWindow.Activate();
+                //}
+                //metroWindow.Show();
+                //metroWindow.Dispatcher.BeginInvoke(new System.Action(async () =>
+                //{
+                //await Task.Delay(4000);
                 var dialog = await metroWindow.ShowMessageAsync(
                 "Błąd połączenia",
                 "Nie udało się połączyć z bazą danych. Czy chcesz zmienić ustawienia?",
@@ -55,10 +71,15 @@ namespace Diary.ViewModels
 
                 if (dialog != MessageDialogResult.Affirmative)
                 {
-                    
+                    SettingsView settingsView = new SettingsView();
+                    settingsView.Show();
                 }
+                //}));
+                //}
             }
         }
+
+
 
         public ICommand AddStudentCommand { get; set; }
         public ICommand EditStudentCommand { get; set; }
@@ -143,10 +164,10 @@ namespace Diary.ViewModels
 
         private async Task DeleteStudent(object obj)
         {
-            
+
             var dialog = await metroWindow.ShowMessageAsync(
-                "Usuwanie ucznia", 
-                $"Czy na pewno chcesz usunąć ucznia {SelectedStudent.FirstName} {SelectedStudent.LastName}?", 
+                "Usuwanie ucznia",
+                $"Czy na pewno chcesz usunąć ucznia {SelectedStudent.FirstName} {SelectedStudent.LastName}?",
                 MessageDialogStyle.AffirmativeAndNegative);
 
             if (dialog != MessageDialogResult.Affirmative)
@@ -184,6 +205,5 @@ namespace Diary.ViewModels
             Students = new ObservableCollection<StudentWrapper>(
                 _repository.GetStudents(SelectedGroupId));
         }
-
     }
 }

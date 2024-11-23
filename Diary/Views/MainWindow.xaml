@@ -76,5 +76,13 @@
                 <DataGridTextColumn Binding="{Binding Group.Name}" Header="Grupa" />
             </DataGrid.Columns>
         </DataGrid>
+        <Grid x:Name="PART_MetroActiveDialogContainer"/>
+                              <!--Grid.Row="0"
+                              Grid.RowSpan="2"
+                              Grid.Column="0"
+                              Grid.ColumnSpan="3"
+                              Panel.ZIndex="5"
+                              FocusVisualStyle="{x:Null}"--> 
     </Grid>
+
 </mah:MetroWindow>

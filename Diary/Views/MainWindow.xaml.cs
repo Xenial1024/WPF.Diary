@@ -23,7 +23,7 @@ namespace Diary.Views
     /// </summary>
     public partial class MainWindow : MetroWindow
     {
-        Settings _settings = new Settings();
+        SettingsView _settingsView = new SettingsView();
         SettingsWrapper _settingsWrapper = new SettingsWrapper();
 
         public MainWindow()
@@ -45,8 +45,9 @@ namespace Diary.Views
 
         private void OpenSettings_Click(object sender, RoutedEventArgs e)
         {
-            _settings.Show();
+            _settingsView.Show();
         }
+
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             if (_settingsWrapper != null)
