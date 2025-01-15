@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
 
 namespace Diary.Models.Wrappers  
 {
@@ -27,19 +22,12 @@ namespace Diary.Models.Wrappers
                     default:
                         break;
                 }
-
                 return Error;
             }
         }
 
         public string Error { get; set; }
 
-        public bool IsValid
-        {
-            get
-            {
-                return string.IsNullOrWhiteSpace(Error);
-            }
-        }
+        public bool IsValid => string.IsNullOrWhiteSpace(Error);
     }
 }

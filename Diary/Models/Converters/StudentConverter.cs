@@ -3,14 +3,12 @@ using Diary.Models.Wrappers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Diary.Models.Converters
 {
-    public static class StudentConverter
+    static class StudentConverter
     {
-        public static StudentWrapper ToWrapper(this Student model)
+        internal static StudentWrapper ToWrapper(this Student model)
         {
             return new StudentWrapper
             {
@@ -39,7 +37,7 @@ namespace Diary.Models.Converters
                 .Select(y => y.Rate));
         }
 
-        public static Student ToDao(this StudentWrapper model)
+        internal static Student ToDao(this StudentWrapper model)
         {
             return new Student
             {
@@ -51,23 +49,38 @@ namespace Diary.Models.Converters
                 Activities = model.Activities
             };
         }
+
         private static void SaveRatings(List<Rating> ratings, string subjectRatings, int studentId, Subject subject)
         {
             if (!string.IsNullOrWhiteSpace(subjectRatings))
             {
-                subjectRatings.Split(',')
+                var cleanedGrades = subjectRatings.Trim(' ', ',');
+                cleanedGrades = cleanedGrades.Replace(" ", ",");
+                cleanedGrades = System.Text.RegularExpressions.Regex.Replace(cleanedGrades, @"(,)+", ",");
+
+                if (!System.Text.RegularExpressions.Regex.IsMatch(cleanedGrades, @"^[0-6 ,]+$"))//@"^[0-6]([,][0-6])*$"))
+                {
+                    return;
+                }
+
+                cleanedGrades.Split(',')
                     .ToList()
                     .ForEach(rate =>
-                        ratings.Add(new Rating
+                    {
+                        if (int.TryParse(rate.Trim(), out int gradeValue) && gradeValue >= 0 && gradeValue <= 6)
                         {
-                            Rate = int.Parse(rate),
-                            StudentId = studentId,
-                            SubjectId = (int)subject
-                        }));
+                            ratings.Add(new Rating
+                            {
+                                Rate = gradeValue,
+                                StudentId = studentId,
+                                SubjectId = (int)subject
+                            });
+                        }
+                    });
             }
         }
 
-        public static List<Rating> ToRatingDao(this StudentWrapper model)
+        internal static List<Rating> ToRatingDao(this StudentWrapper model)
         {
             var ratings = new List<Rating>();
 

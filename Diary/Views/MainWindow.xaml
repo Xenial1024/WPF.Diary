@@ -6,10 +6,25 @@
         xmlns:mah="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         xmlns:local="clr-namespace:Diary"
         xmlns:wrappers="clr-namespace:Diary.Models.Wrappers"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
         mc:Ignorable="d"
         WindowStartupLocation="CenterScreen"
-        Title="Dziennik ucznia" Height="450" Width="920">
+        Title="Dziennik ucznia" Height="450" Width="920"
+        xmlns:vm="clr-namespace:Diary.ViewModels">
+    
+    <Window.DataContext>
+        <vm:MainViewModel />
+    </Window.DataContext>
 
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <i:InvokeCommandAction Command="{Binding LoadedWindowCommand}" />
+        </i:EventTrigger>
+        <i:EventTrigger EventName="Closing">
+            <i:InvokeCommandAction Command="{Binding ClosingCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+    
     <mah:MetroWindow.Resources>
         <wrappers:SettingsWrapper x:Key="SettingsWrapper" />
     </mah:MetroWindow.Resources>
@@ -49,10 +64,11 @@
 
             <Button 
                 Command="{Binding SettingsCommand}" 
-                Content="Ustawienia" Click="OpenSettings_Click"/>
+                Content="Ustawienia"/>
 
         </StackPanel>
         <DataGrid 
+            x:Name="dgStudentsAndGrades"
             Grid.Row="1" 
             Margin="5"
             FontSize="14"
@@ -66,7 +82,6 @@
                 <DataGridTextColumn Binding="{Binding Id}" Visibility="Hidden" />
                 <DataGridTextColumn Binding="{Binding FirstName}" Header="Imię" />
                 <DataGridTextColumn Binding="{Binding LastName}" Header="Nazwisko" />
-                <DataGridTextColumn Binding="{Binding Comments}" Header="Uwagi" />
                 <DataGridTextColumn Binding="{Binding Math}" Header="Matematyka" />
                 <DataGridTextColumn Binding="{Binding Technology}" Header="Technologia" />
                 <DataGridTextColumn Binding="{Binding Physics}" Header="Fizyka" />
@@ -74,15 +89,10 @@
                 <DataGridTextColumn Binding="{Binding ForeignLang}" Header="Język obcy" />
                 <DataGridCheckBoxColumn Binding="{Binding Activities}" Header="Dodatkowe" />
                 <DataGridTextColumn Binding="{Binding Group.Name}" Header="Grupa" />
+                <DataGridTextColumn Binding="{Binding Comments}" Header="Uwagi" />
             </DataGrid.Columns>
         </DataGrid>
         <Grid x:Name="PART_MetroActiveDialogContainer"/>
-                              <!--Grid.Row="0"
-                              Grid.RowSpan="2"
-                              Grid.Column="0"
-                              Grid.ColumnSpan="3"
-                              Panel.ZIndex="5"
-                              FocusVisualStyle="{x:Null}"--> 
     </Grid>
 
 </mah:MetroWindow>

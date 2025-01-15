@@ -9,7 +9,7 @@
         <Setter Property="Padding" Value="4" />
         <Setter Property="Margin" Value="5" />
         <Setter Property="FontSize" Value="14"/>
-        <Setter Property="Height" Value="25"/>
+        <Setter Property="Height" Value="27"/>
     </Style>
 
 </ResourceDictionary>

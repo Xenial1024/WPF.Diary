@@ -1,18 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
 
 namespace Diary.Models.Wrappers
 {
     public class StudentWrapper : IDataErrorInfo
     {
-        public StudentWrapper()
-        {
-            Group = new GroupWrapper();
-        }
         public int Id { get; set; }
         public string FirstName { get; set; }
         public string LastName { get; set; }
@@ -24,10 +15,14 @@ namespace Diary.Models.Wrappers
         public string ForeignLang { get; set; }
         public bool Activities { get; set; }
         public GroupWrapper Group { get; set; }
-
-
         private bool _isFirstNameValid;
         private bool _isLastNameValid;
+
+        protected internal StudentWrapper()
+        {
+            Group = new GroupWrapper();
+        }
+
         public string this[string columnName]
         {
             get
@@ -61,19 +56,12 @@ namespace Diary.Models.Wrappers
                     default:
                         break;
                 }
-
                 return Error;
             }
         }
 
         public string Error { get; set; }
 
-        public bool IsValid 
-        { 
-            get
-            {
-                return _isFirstNameValid && _isLastNameValid && Group.IsValid;
-            }
-        }
+        public bool IsValid => _isFirstNameValid && _isLastNameValid && Group.IsValid;
     }
 }

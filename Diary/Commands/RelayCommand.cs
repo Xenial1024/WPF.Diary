@@ -3,7 +3,7 @@ using System.Windows.Input;
 
 namespace Diary.Commands
 {
-    public class RelayCommand : ICommand
+    class RelayCommand : ICommand
     {
         readonly Action<object> _execute;
         readonly Predicate<object> _canExecute;
@@ -19,10 +19,7 @@ namespace Diary.Commands
             _canExecute = canExecute;
         }
 
-        public bool CanExecute(object parameter)
-        {
-            return _canExecute == null || _canExecute(parameter);
-        }
+        public bool CanExecute(object parameter) => _canExecute == null || _canExecute(parameter);
 
         public event EventHandler CanExecuteChanged
         {

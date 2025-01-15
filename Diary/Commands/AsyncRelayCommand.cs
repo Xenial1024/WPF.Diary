@@ -5,7 +5,7 @@ using System.Windows.Input;
 
 namespace Diary.Commands
 {
-    public class AsyncRelayCommand : ICommand
+    class AsyncRelayCommand : ICommand
     {
         private readonly Func<object, Task> execute;
         private readonly Func<object, bool> canExecute;

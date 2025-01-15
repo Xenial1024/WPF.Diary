@@ -1,12 +1,8 @@
+using System.Data.Entity.Migrations;
+
 namespace Diary.Migrations
 {
-    using System;
-    using System.Data.Entity;
-    using System.Data.Entity.Migrations;
-    using System.Data.Entity.Infrastructure;
-    using System.Linq;
-
-    internal sealed class Configuration : DbMigrationsConfiguration<Diary.ApplicationDbContext>
+    sealed class Configuration : DbMigrationsConfiguration<Diary.ApplicationDbContext>
     {
         public Configuration()
         {

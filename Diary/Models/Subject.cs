@@ -1,5 +1,4 @@
-﻿
-namespace Diary.Models
+﻿namespace Diary.Models
 {
     public enum Subject
     {

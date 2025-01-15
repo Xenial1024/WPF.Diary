@@ -2,13 +2,10 @@
 using MahApps.Metro.Controls.Dialogs;
 using System;
 using System.Windows;
-using System.Data.Entity;
+using Diary.Views;
 
 namespace Diary
 {
-    /// <summary>
-    /// Interaction logic for App.xaml
-    /// </summary>
     public partial class App : Application
     {
         private void Application_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
@@ -21,6 +18,14 @@ namespace Diary
 
             e.Handled = true;
         }
-
+        private void Application_Startup(object sender, StartupEventArgs e)
+        {
+            Diary.Views.SplashScreen splashScreen = new Diary.Views.SplashScreen();
+            splashScreen.Show();
+            MainWindow mainWindow = new MainWindow();
+            Application.Current.MainWindow = mainWindow;
+            mainWindow.Show();
+            splashScreen.Close();
+        }
     }
 }

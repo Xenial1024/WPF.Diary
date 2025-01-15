@@ -1,10 +1,9 @@
 ﻿using System.ComponentModel;
-using Diary.Properties;
 
 namespace Diary.Models.Wrappers
 
 {
-    public class SettingsWrapper : INotifyPropertyChanged
+    class SettingsWrapper : INotifyPropertyChanged
     {
         public static SettingsWrapper Instance { get; } = new SettingsWrapper();
 
@@ -28,6 +27,5 @@ namespace Diary.Models.Wrappers
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-
     }
 }

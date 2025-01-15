@@ -1,5 +1,4 @@
-﻿using MahApps.Metro.Controls;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -15,10 +14,12 @@ using System.Windows.Shapes;
 
 namespace Diary.Views
 {
-
-    public partial class SettingsView : MetroWindow
+    /// <summary>
+    /// Interaction logic for SplashScreen.xaml
+    /// </summary>
+    public partial class SplashScreen : Window
     {
-        public SettingsView()
+        public SplashScreen()
         {
             InitializeComponent();
         }

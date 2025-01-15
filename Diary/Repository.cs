@@ -3,25 +3,14 @@ using Diary.Models.Wrappers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Data.Entity;
 using Diary.Models.Converters;
 using Diary.Models;
-using System.Runtime.CompilerServices;
-using System.Web;
-using System.Windows;
-using MahApps.Metro.Controls.Dialogs;
-using MahApps.Metro.Controls;
-using Diary.Views;
 
 namespace Diary
 {
-    public class Repository
+    internal class Repository
     {
-
-
-
         public List<Group> GetGroups()
         {
             try
@@ -57,7 +46,6 @@ namespace Diary
                         .ToList()
                         .Select(x => x.ToWrapper())
                         .ToList();
-
                 }
             }
             catch (Exception)
@@ -102,14 +90,10 @@ namespace Diary
             }
         }
 
-        private static List<Rating> GetStudentsRatings(ApplicationDbContext context,
-            Student student)
-        {
-            return context
-                    .Ratings
+        private static List<Rating> GetStudentsRatings(ApplicationDbContext context, Student student)
+        =>  context .Ratings
                     .Where(x => x.StudentId == student.Id)
                     .ToList();
-        }
 
         private void UpdateStudentProperties(ApplicationDbContext context, 
             Student student)

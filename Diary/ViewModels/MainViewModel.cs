@@ -1,27 +1,26 @@
-﻿using Caliburn.Micro;
-using Diary.Commands;
-using Diary.Models;
+﻿using Diary.Commands;
 using Diary.Models.Domains;
 using Diary.Models.Wrappers;
 using Diary.Views;
 using MahApps.Metro.Controls;
 using MahApps.Metro.Controls.Dialogs;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace Diary.ViewModels
 {
-    public class MainViewModel : ViewModelBase
+    class MainViewModel : ViewModelBase
     {
-        MetroWindow metroWindow = Application.Current.MainWindow as MetroWindow;
-        private Repository _repository = new Repository();
+        private readonly Repository _repository = new Repository();
+        internal static bool WasConnectionToDatabaseValid; //Tymczasowe pole potrzebne po to, żeby w przypadku braku połączenia, w oknie DbSettingsView po kliknięciu przycisku "Anuluj" nie musieć czekać na timeout połączenia z bazą danych, tylko żeby aplikacja natychmiast się zamknęła.
+        private StudentWrapper _selectedStudent;
+        private ObservableCollection<StudentWrapper> _students;
+        private int _selectedGroupId;
+        private ObservableCollection<Group> _group;
+
         public MainViewModel()
         {
             AddStudentCommand = new RelayCommand(AddEditStudent);
@@ -30,63 +29,108 @@ namespace Diary.ViewModels
             DeleteStudentCommand = new AsyncRelayCommand(DeleteStudent,
                 CanEditDeleteStudent);
             RefreshStudentsCommand = new RelayCommand(RefreshStudents);
-
-            RefreshDiary();
-            InitGroups();
-            //metroWindow.Loaded += MetroWindow_Loaded;
-            //for (; ; )
-            //{
-            //    if (metroWindow != null && metroWindow.IsLoaded)
-            //    {
-            //        OpenDialogIfConnectionToDatabaseFailed();
-            //        break;
-            //    }
-            //}
-            OpenDialogIfConnectionToDatabaseFailed();
+            LoadedWindowCommand = new RelayCommand(LoadedWindow);
+            SettingsCommand = new RelayCommand(OpenSettings);
+            OnClosingCommand = new RelayCommand(RememberStateOfWindow);
+            LoadedWindow(null);
         }
-
-        //private void MetroWindow_Loaded(object sender, RoutedEventArgs e)
-        //{
-        //    OpenDialogIfConnectionToDatabaseFailed();
-        //}
-
-        private async void OpenDialogIfConnectionToDatabaseFailed()
-        {
-            if (!IsConnectionToDatabaseValid())
-            {
-                //if (metroWindow != null)
-                //{
-                //if (!metroWindow.IsActive)
-                //{
-                //    metroWindow.Activate();
-                //}
-                //metroWindow.Show();
-                //metroWindow.Dispatcher.BeginInvoke(new System.Action(async () =>
-                //{
-                //await Task.Delay(4000);
-                var dialog = await metroWindow.ShowMessageAsync(
-                "Błąd połączenia",
-                "Nie udało się połączyć z bazą danych. Czy chcesz zmienić ustawienia?",
-                MessageDialogStyle.AffirmativeAndNegative);
-
-                if (dialog != MessageDialogResult.Affirmative)
-                {
-                    SettingsView settingsView = new SettingsView();
-                    settingsView.Show();
-                }
-                //}));
-                //}
-            }
-        }
-
-
 
         public ICommand AddStudentCommand { get; set; }
         public ICommand EditStudentCommand { get; set; }
         public ICommand DeleteStudentCommand { get; set; }
         public ICommand RefreshStudentsCommand { get; set; }
+        public ICommand LoadedWindowCommand { get; set; }
+        public ICommand SettingsCommand { get; set; }
+        public ICommand OnClosingCommand { get; set; }
 
-        bool IsConnectionToDatabaseValid()
+        public StudentWrapper SelectedStudent
+        {
+            get => _selectedStudent;
+            set
+            {
+                _selectedStudent = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public ObservableCollection<StudentWrapper> Students
+        {
+            get => _students;
+            set
+            {
+                _students = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public int SelectedGroupId
+        {
+            get => _selectedGroupId;
+            set
+            {
+                _selectedGroupId = value;
+                OnPropertyChanged();
+                RefreshDiary();
+            }
+        }
+
+        public ObservableCollection<Group> Groups
+        {
+            get => _group;
+            set
+            {
+                _group = value;
+                OnPropertyChanged();
+            }
+        }
+
+        private void RememberStateOfWindow(object obj)
+        {
+            var windowState = obj as WindowState?;
+            if (windowState.HasValue)
+            {
+                SettingsWrapper _settingsWrapper = new SettingsWrapper();
+                _settingsWrapper.IsMaximized = windowState.Value == WindowState.Maximized;
+            }
+        }
+
+        private void OpenSettings(object obj)
+        {
+            DbSettingsView dbSettingsView = new DbSettingsView();
+            dbSettingsView.ShowDialog();
+        }
+
+        private async void LoadedWindow(object obj)
+        {
+            if (!IsConnectionToDatabaseValid())
+            {
+                if (Application.Current.MainWindow is MetroWindow metroWindow)
+                {
+                    var dialog = await metroWindow.ShowMessageAsync(
+                "Błąd połączenia",
+                "Nie udało się połączyć z bazą danych. Czy chcesz zmienić ustawienia?",
+                MessageDialogStyle.AffirmativeAndNegative,
+                    new MetroDialogSettings
+                    {
+                        AffirmativeButtonText = "Tak",
+                        NegativeButtonText = "Nie"
+                    });
+
+                    if (dialog != MessageDialogResult.Affirmative)
+                        Application.Current.Shutdown();
+                    DbSettingsView dbSettingsView = new DbSettingsView();
+                    dbSettingsView.ShowDialog();
+                }
+            }
+            else
+            {
+                WasConnectionToDatabaseValid = true;
+                RefreshDiary();
+                InitGroups();
+            }
+        }
+
+        public bool IsConnectionToDatabaseValid()
         {
             try
             {
@@ -98,112 +142,54 @@ namespace Diary.ViewModels
                 }
             }
 
-            catch (Exception)
+            catch (Exception ex)
             {
+                System.Diagnostics.Debug.WriteLine($"Nieudane połączenie z bazą danych: {ex.Message}"); 
                 return false;
             }
         }
 
+        private void RefreshStudents(object obj) => RefreshDiary();
 
-        private StudentWrapper _selectedStudent;
-        public StudentWrapper SelectedStudent
-        {
-            get { return _selectedStudent; }
-            set
-            {
-                _selectedStudent = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private ObservableCollection<StudentWrapper> _students;
-        public ObservableCollection<StudentWrapper> Students
-        {
-            get { return _students; }
-            set
-            {
-                _students = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private int _selectedGroupId;
-
-        public int SelectedGroupId
-        {
-            get { return _selectedGroupId; }
-            set
-            {
-                _selectedGroupId = value;
-                OnPropertyChanged();
-            }
-        }
-
-        private ObservableCollection<Group> _group;
-        public ObservableCollection<Group> Groups
-        {
-            get { return _group; }
-            set
-            {
-                _group = value;
-                OnPropertyChanged();
-            }
-        }
-
-
-        private void RefreshStudents(object obj)
-        {
-            RefreshDiary();
-        }
-
-
-        private bool CanEditDeleteStudent(object obj)
-        {
-            return SelectedStudent != null;
-        }
+        private bool CanEditDeleteStudent(object obj) =>SelectedStudent != null;
 
         private async Task DeleteStudent(object obj)
         {
-
+            MetroWindow metroWindow = Application.Current.MainWindow as MetroWindow;
             var dialog = await metroWindow.ShowMessageAsync(
                 "Usuwanie ucznia",
                 $"Czy na pewno chcesz usunąć ucznia {SelectedStudent.FirstName} {SelectedStudent.LastName}?",
-                MessageDialogStyle.AffirmativeAndNegative);
+                MessageDialogStyle.AffirmativeAndNegative,
+                    new MetroDialogSettings
+                    {
+                        AffirmativeButtonText = "Tak",
+                        NegativeButtonText = "Nie"
+                    }); 
 
             if (dialog != MessageDialogResult.Affirmative)
                 return;
-
             _repository.DeleteStudent(SelectedStudent.Id);
-
             RefreshDiary();
         }
 
         private void AddEditStudent(object obj)
         {
-            var addEditStudentWindow = new AddEditStudentView(obj as StudentWrapper);
+            AddEditStudentView addEditStudentWindow = new AddEditStudentView(obj as StudentWrapper);
             addEditStudentWindow.Closed += AddEditStudentWindow_Closed;
             addEditStudentWindow.ShowDialog();
         }
 
-        private void AddEditStudentWindow_Closed(object sender, EventArgs e)
-        {
-            RefreshDiary();
-        }
+        private void AddEditStudentWindow_Closed(object sender, EventArgs e) => RefreshDiary();
 
         private void InitGroups()
         {
             var groups = _repository.GetGroups();
             groups.Insert(0, new Group { Id = 0, Name = "Wszystkie" });
-
             Groups = new ObservableCollection<Group>(groups);
-
             SelectedGroupId = 0;
         }
 
-        private void RefreshDiary()
-        {
-            Students = new ObservableCollection<StudentWrapper>(
-                _repository.GetStudents(SelectedGroupId));
-        }
+        private void RefreshDiary() 
+            => Students = new ObservableCollection<StudentWrapper>(_repository.GetStudents(SelectedGroupId));
     }
 }

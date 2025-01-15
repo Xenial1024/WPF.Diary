@@ -43,7 +43,7 @@
             Grid.Row="1" 
             Content="Imię:"/>
         <TextBox 
-            Text="{Binding Student.FirstName, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True}" 
+            Text="{Binding Student.FirstName, UpdateSourceTrigger=PropertyChanged, ValidatesOnDataErrors=True, FallbackValue='Brak danych'}" 
             Grid.Row="1" 
             Grid.Column="1"/>
 
@@ -126,8 +126,12 @@
             Height="125"/>
 
         <StackPanel Orientation="Horizontal" Grid.Row="11" Grid.Column="1" HorizontalAlignment="Right">
-            <Button Command="{Binding CloseCommand}" CommandParameter="{Binding ElementName=AddEditStudentWindow}" Content="Anuluj"/>
-            <Button Command="{Binding ConfirmCommand}" CommandParameter="{Binding ElementName=AddEditStudentWindow}" Content="Zatwierdź"/>
+            <Button Command="{Binding CloseCommand}" 
+                    CommandParameter="{Binding ElementName=AddEditStudentWindow}" 
+                    Content="Anuluj"/>
+            <Button Command="{Binding ConfirmCommand}" 
+                    CommandParameter="{Binding ElementName=AddEditStudentWindow}" 
+                    Content="Zatwierdź"/>
         </StackPanel>
 
     </Grid>

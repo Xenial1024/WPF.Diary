@@ -1,21 +1,22 @@
 ﻿using Diary.Commands;
 using Diary.Models.Domains;
 using Diary.Models.Wrappers;
-using MahApps.Metro.Controls;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Input;
 using MahApps.Metro.Controls.Dialogs;
 using Diary.Views;
-using System.Linq;
-using System.Windows.Media.Converters;
-
 
 namespace Diary.ViewModels
 {
-    public class AddEditStudentViewModel : ViewModelBase
+    class AddEditStudentViewModel : ViewModelBase
     {
-        private Repository _repository = new Repository();
+        private readonly Repository _repository = new Repository();
+        private StudentWrapper _student;
+        private bool _isUpdate;
+        private int _selectedGroupId;
+        private ObservableCollection<Group> _group;
+        private readonly char[] _charsToDelete = { ' ', ',' };
 
         public AddEditStudentViewModel(StudentWrapper student = null)
         {
@@ -37,46 +38,36 @@ namespace Diary.ViewModels
 
         public ICommand CloseCommand { get; set; }
         public ICommand ConfirmCommand { get; set; }
-
-
-        private StudentWrapper _student;
         public StudentWrapper Student
         {
-            get { return _student; }
+            get => _student; 
             set
             {
                 _student = value;
                 OnPropertyChanged();
             }
         }
-
-        private bool _isUpdate;
         public bool IsUpdate
         {
-            get { return _isUpdate; }
+            get => _isUpdate;
             set
             {
                 _isUpdate = value;
                 OnPropertyChanged();
             }
         }
-
-        private int _selectedGroupId;
-
         public int SelectedGroupId
         {
-            get { return _selectedGroupId; }
+            get => _selectedGroupId;
             set
             {
                 _selectedGroupId = value;
                 OnPropertyChanged();
             }
         }
-
-        private ObservableCollection<Group> _group;
         public ObservableCollection<Group> Groups
         {
-            get { return _group; }
+            get => _group;
             set
             {
                 _group = value;
@@ -84,25 +75,40 @@ namespace Diary.ViewModels
             }
         }
 
-        private char[] _charsToDelete = { ' ', ',' };
+        private bool ValidateGrades(string subjectGrades, string subjectName, AddEditStudentView view)
+        {
+            if (!string.IsNullOrWhiteSpace(subjectGrades))
+            {
+                string cleanedGrades = subjectGrades.Trim(_charsToDelete).Replace(" ", ",");
+                cleanedGrades = System.Text.RegularExpressions.Regex.Replace(cleanedGrades, @"(,)+", ",");
+                if (!System.Text.RegularExpressions.Regex.IsMatch(cleanedGrades, @"^[0-6]([,\s][0-6])*$"))
+                {
+                    _ = view.ShowMessageAsync("Błąd", $"Oceny w przedmiocie {subjectName} muszą być liczbami całkowitymi od 0 do 6, oddzielonymi spacją lub przecinkiem.");
+                    return false;
+                }
+            }
+            return true;
+        }
+
         private async void Confirm(object obj)
         {
-            ConfirmCommand = new RelayCommand(Confirm);
             AddEditStudentView addEditStudentView = obj as AddEditStudentView;
+
             if (!Student.IsValid)
             {
                 await addEditStudentView.ShowMessageAsync("Błąd", "Nie wprowadzono wymaganych danych.");
                 return;
             }
-            //if (!int.TryParse(Student.Math, out _))
-            if (!System.Text.RegularExpressions.Regex.IsMatch(Student.Math, @"^[0-6 ,]+$"))
+
+            if (!ValidateGrades(Student.Math, "Matematyka", addEditStudentView) ||
+                !ValidateGrades(Student.Physics, "Fizyka", addEditStudentView) ||
+                !ValidateGrades(Student.PolishLang, "Język polski", addEditStudentView) ||
+                !ValidateGrades(Student.ForeignLang, "Język obcy", addEditStudentView) ||
+                !ValidateGrades(Student.Technology, "Technologia", addEditStudentView))
             {
-                await addEditStudentView.ShowMessageAsync("Błąd", "Ocena musi być liczbą całkowitą od 0 do 6. Oceny mogą być oddzielone spacją lub przecinkiem.");
                 return;
             }
-            Student.Math = Student.Math.Trim(_charsToDelete);
-            Student.Math = Student.Math.Replace(' ', ',');
-            Student.Math = System.Text.RegularExpressions.Regex.Replace(Student.Math, @"(,)+", ",");// Usunięcie nadmiarowych przecinków
+
             if (IsUpdate)
                 UpdateStudent();
             else
@@ -111,33 +117,19 @@ namespace Diary.ViewModels
             CloseWindow(obj as Window);
         }
 
-        private void UpdateStudent()
-        {
-            _repository.UpdateStudent(Student);
-        }
+        private void UpdateStudent() => _repository.UpdateStudent(Student);
 
-        private void AddStudent()
-        {
-            _repository.AddStudent(Student);
-        }
+        private void AddStudent() => _repository.AddStudent(Student);
 
-        private void Close(object obj)
-        {
-            CloseWindow(obj as Window);
-        }
+        private void Close(object obj) => CloseWindow(obj as Window);
 
-        private void CloseWindow(Window window)
-        {
-            window.Close();
-        }     
+        private void CloseWindow(Window window) => window.Close();
 
         private void InitGroups()
         {
             var groups = _repository.GetGroups();
             groups.Insert(0, new Group { Id = 0, Name = "-- brak --" });
-
             Groups = new ObservableCollection<Group>(groups);
-
             SelectedGroupId = Student.Group.Id;
         }
     }
