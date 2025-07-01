@@ -37,7 +37,7 @@ namespace Diary.Models.Converters
                 .Select(y => y.Rate));
         }
 
-        internal static Student ToDao(this StudentWrapper model)
+        internal static Student ToDomain(this StudentWrapper model)
         {
             return new Student
             {
@@ -80,7 +80,7 @@ namespace Diary.Models.Converters
             }
         }
 
-        internal static List<Rating> ToRatingDao(this StudentWrapper model)
+        internal static List<Rating> ToRatingDomain(this StudentWrapper model)
         {
             var ratings = new List<Rating>();
 

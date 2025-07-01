@@ -66,8 +66,8 @@ namespace Diary
 
         public void UpdateStudent(StudentWrapper studentWrapper)
         {
-            var student = studentWrapper.ToDao();
-            var ratings = studentWrapper.ToRatingDao();
+            var student = studentWrapper.ToDomain();
+            var ratings = studentWrapper.ToRatingDomain();
 
             using (var context = new ApplicationDbContext())
             {
@@ -143,8 +143,8 @@ namespace Diary
 
         public void AddStudent(StudentWrapper studentWrapper)
         {
-            var student = studentWrapper.ToDao();
-            var ratings = studentWrapper.ToRatingDao();
+            var student = studentWrapper.ToDomain();
+            var ratings = studentWrapper.ToRatingDomain();
 
             using (var context = new ApplicationDbContext())
             {
